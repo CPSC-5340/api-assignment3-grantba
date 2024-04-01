@@ -8,14 +8,29 @@
 import SwiftUI
 
 struct CharacterView: View {
+    
+    @ObservedObject var charactervm = CharacterViewModel()
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundColor(.accentColor)
-            Text("Hello, world!")
+        NavigationStack {
+            List {
+                ForEach(charactervm.characterData) { character in
+                    NavigationLink {
+                        CharacterDetail(character: character)
+                    } label: {
+                        Text(character.name)
+                    }
+                }
+            }
+            .task {
+                await charactervm.fetchData()
+            }
+            .listStyle(.grouped)
+            .navigationTitle("Disney Characters")
+            .alert(isPresented: $charactervm.hasError, error: charactervm.error) {
+                Text("")
+            }
         }
-        .padding()
     }
 }
 
